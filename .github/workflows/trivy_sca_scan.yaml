@@ -18,7 +18,7 @@ jobs:
 
       # Run Trivy GitHub Action
       - name: Run Trivy Scan
-        uses: aquasecurity/trivy-action@v0.11.0
+        uses: aquasecurity/trivy-action@v0.20.0
         with:
           scan-type: 'fs'  # File System scan
           severity: 'CRITICAL,HIGH,MEDIUM,LOW'  # Filter vulnerabilities by severity

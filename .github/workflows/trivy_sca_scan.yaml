@@ -1,4 +1,4 @@
-name: Trivy Scan
+name: Trivy Scan for Apache Airflow
 
 on:
   push:
@@ -12,23 +12,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository code
+      # Checkout the forked Airflow repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Use a specific Trivy GitHub Action version
-      - name: Run Trivy Scan
-        uses: aquasecurity/trivy-action@v0.10.0
-        with:
-          scan-type: 'fs'  # File System scan
-          severity: 'CRITICAL,HIGH'  # Filter vulnerabilities by severity
-          format: 'table'  # Output format: table or json
-          ignore-unfixed: true  # Exclude vulnerabilities with no fixes
+      # Install Trivy manually (if GitHub Action resolution is still an issue)
+      - name: Install Trivy
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update -y
+          sudo apt-get install -y trivy
 
-      # (Optional) Upload the scan result as an artifact if using JSON format
+      # Run Trivy scan on the filesystem of the repository
+      - name: Run Trivy filesystem scan
+        run: |
+          trivy fs . --exit-code 0 --severity HIGH,CRITICAL --ignore-unfixed --output trivy-report.txt
+
+      # (Optional) Upload the Trivy scan report as an artifact
       - name: Upload Trivy report
-        if: success()
         uses: actions/upload-artifact@v3
         with:
           name: trivy-report
-          path: trivy-report.json
+          path: trivy-report.txt

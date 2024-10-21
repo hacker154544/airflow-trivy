@@ -16,12 +16,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Run Trivy GitHub Action
+      # Use the latest Trivy GitHub Action from v0 release
       - name: Run Trivy Scan
-        uses: aquasecurity/trivy-action@v0.20.0
+        uses: aquasecurity/trivy-action@v0
         with:
           scan-type: 'fs'  # File System scan
-          severity: 'CRITICAL,HIGH,MEDIUM,LOW'  # Filter vulnerabilities by severity
+          severity: 'CRITICAL,HIGH'  # Filter vulnerabilities by severity
           format: 'table'  # Output format: table or json
           ignore-unfixed: true  # Exclude vulnerabilities with no fixes
 

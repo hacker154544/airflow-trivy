@@ -1,0 +1,34 @@
+name: Trivy Scan
+
+on:
+  workflow_dispatch:  # Allows manual trigger
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  trivy-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Trivy Action
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'             # For scanning the file system
+          severity: 'MEDIUM,LOW,HIGH,CRITICAL'    # Only report high and critical severity issues
+          ignore-unfixed: true         # Ignore issues that have no fix available
+          format: 'table'              # Output format for readability
+          output: 'trivy_report.txt'   # Output the results to a file
+
+      - name: Upload Trivy report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-scan-results
+          path: trivy_report.txt

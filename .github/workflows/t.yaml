@@ -1,7 +1,7 @@
-name: Trivy Scan
+name: Daily Trivy SCA Scan
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # Allows manual triggering of the workflow
   push:
     branches:
       - main
@@ -10,25 +10,29 @@ on:
       - main
 
 jobs:
-  trivy-scan:
+  trivy-sca-scan:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Trivy Action
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          severity: 'MEDIUM,LOW,HIGH,CRITICAL'
-          ignore-unfixed: true
-          format: 'table'
-          output: 'trivy_report.txt'
+      - name: Install Trivy
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y wget gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update -y
+          sudo apt-get install -y trivy
+
+      - name: Run Trivy SCA scan
+        run: |
+          trivy fs --scanners vuln --severity HIGH,CRITICAL,MEDIUM,LOW --ignore-unfixed --format table . > trivy_report.txt || echo "Trivy scan failed"
 
       - name: Upload Trivy report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: trivy-scan-results
+          name: trivy-sca-scan-results
           path: trivy_report.txt

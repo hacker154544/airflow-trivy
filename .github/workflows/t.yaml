@@ -1,7 +1,7 @@
 name: Trivy Scan
 
 on:
-  workflow_dispatch:  # Allows manual trigger
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -20,11 +20,11 @@ jobs:
       - name: Run Trivy Action
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'             # For scanning the file system
-          severity: 'MEDIUM,LOW,HIGH,CRITICAL'    # Only report high and critical severity issues
-          ignore-unfixed: true         # Ignore issues that have no fix available
-          format: 'table'              # Output format for readability
-          output: 'trivy_report.txt'   # Output the results to a file
+          scan-type: 'fs'
+          severity: 'MEDIUM,LOW,HIGH,CRITICAL'
+          ignore-unfixed: true
+          format: 'table'
+          output: 'trivy_report.txt'
 
       - name: Upload Trivy report
         if: always()
